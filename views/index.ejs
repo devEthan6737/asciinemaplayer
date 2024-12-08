@@ -12,20 +12,20 @@
         <div class="selectors">
             <select id="materia">
                 <option value="">Selecciona una materia</option>
-                <% materias.forEach(materia => { %>
-                    <option value="<%= materia %>"><%= materia %></option>
-                <% }); %>
             </select>
-            <select id="alumno" disabled>
+            <select id="alumno">
                 <option value="">Selecciona un alumno</option>
             </select>
-            <select id="grabacion" disabled>
+            <select id="grabacion">
                 <option value="">Selecciona una grabación</option>
             </select>
         </div>
         <div id="grabacion-info"></div>
         <div id="player-container"></div>
     </div>
+    <script>
+        const estructura = <%- estructura %>;
+    </script>
     <script src="/js/main.js"></script>
 </body>
 </html>

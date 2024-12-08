@@ -5,18 +5,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const grabacionInfo = document.getElementById('grabacion-info');
     const playerContainer = document.getElementById('player-container');
 
-    materiaSelect.addEventListener('change', async () => {
+    // Poblar el select de materias
+    Object.keys(estructura).forEach(materia => {
+        const option = document.createElement('option');
+        option.value = materia;
+        option.textContent = materia;
+        materiaSelect.appendChild(option);
+    });
+
+    materiaSelect.addEventListener('change', () => {
         const materia = materiaSelect.value;
         alumnoSelect.innerHTML = '<option value="">Selecciona un alumno</option>';
         grabacionSelect.innerHTML = '<option value="">Selecciona una grabación</option>';
-        alumnoSelect.disabled = !materia;
-        grabacionSelect.disabled = true;
         grabacionInfo.innerHTML = '';
         playerContainer.innerHTML = '';
 
         if (materia) {
-            const alumnos = JSON.parse(materiaSelect.options[materiaSelect.selectedIndex].dataset.alumnos);
-            alumnos.forEach(alumno => {
+            Object.keys(estructura[materia]).forEach(alumno => {
                 const option = document.createElement('option');
                 option.value = alumno;
                 option.textContent = alumno;
@@ -25,48 +30,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    alumnoSelect.addEventListener('change', async () => {
+    alumnoSelect.addEventListener('change', () => {
         const materia = materiaSelect.value;
         const alumno = alumnoSelect.value;
         grabacionSelect.innerHTML = '<option value="">Selecciona una grabación</option>';
-        grabacionSelect.disabled = !alumno;
         grabacionInfo.innerHTML = '';
         playerContainer.innerHTML = '';
 
         if (alumno) {
-            const response = await fetch(`/grabaciones/${materia}/${alumno}`);
-            const grabaciones = await response.json();
-            grabaciones.forEach(grabacion => {
+            estructura[materia][alumno].forEach(grabacion => {
                 const option = document.createElement('option');
-                option.value = grabacion.nombre;
-                option.textContent = grabacion.nombre;
-                option.dataset.info = JSON.stringify(grabacion);
+                option.value = grabacion;
+                option.textContent = grabacion;
                 grabacionSelect.appendChild(option);
             });
         }
     });
 
-    grabacionSelect.addEventListener('change', () => {
+    grabacionSelect.addEventListener('change', async () => {
+        const materia = materiaSelect.value;
+        const alumno = alumnoSelect.value;
         const grabacion = grabacionSelect.value;
-        grabacionInfo.innerHTML = '';
-        playerContainer.innerHTML = '';
 
         if (grabacion) {
-            const info = JSON.parse(grabacionSelect.options[grabacionSelect.selectedIndex].dataset.info);
+            await cargarInformacionGrabacion(materia, alumno, grabacion);
+            cargarReproductor(materia, alumno, grabacion);
+        } else {
+            grabacionInfo.innerHTML = '';
+            playerContainer.innerHTML = '';
+        }
+    });
+
+    async function cargarInformacionGrabacion(materia, alumno, grabacion) {
+        try {
+            const response = await fetch(`/grabacion/${materia}/${alumno}/${grabacion}`);
+            if (!response.ok) {
+                throw new Error('No se pudo cargar la información de la grabación');
+            }
+            const info = await response.json();
             grabacionInfo.innerHTML = `
                 <p><strong>Nombre:</strong> ${info.nombre}</p>
                 <p><strong>Tamaño:</strong> ${info.tamaño}</p>
                 <p><strong>Fecha:</strong> ${info.fecha}</p>
             `;
-
-            const materia = materiaSelect.value;
-            const alumno = alumnoSelect.value;
-            const playerFrame = document.createElement('iframe');
-            playerFrame.src = `/player/${materia}/${alumno}/${grabacion}`;
-            playerFrame.style.width = '100%';
-            playerFrame.style.height = '400px';
-            playerFrame.style.border = 'none';
-            playerContainer.appendChild(playerFrame);
+        } catch (error) {
+            console.error('Error al cargar la información de la grabación:', error);
+            grabacionInfo.innerHTML = '<p class="error">Error al cargar la información de la grabación</p>';
         }
-    });
+    }
+
+    function cargarReproductor(materia, alumno, grabacion) {
+        playerContainer.innerHTML = '';
+        const playerFrame = document.createElement('iframe');
+        playerFrame.src = `/player/${materia}/${alumno}/${grabacion}`;
+        playerFrame.style.width = '100%';
+        playerFrame.style.height = '400px';
+        playerFrame.style.border = 'none';
+        playerContainer.appendChild(playerFrame);
+    }
 });
