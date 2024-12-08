@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor Asciinema - <%= grabacion %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/asciinema-player@3.0.1/dist/bundle/asciinema-player.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Reproductor Asciinema - <%= grabacion %></h1>
+        <div id="player"></div>
+        <a href="/" class="back-button">Volver</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/asciinema-player@3.0.1/dist/bundle/asciinema-player.min.js"></script>
+    <script>
+        AsciinemaPlayer.create('/grabaciones/<%= materia %>/<%= alumno %>/<%= grabacion %>', document.getElementById('player'), {
+            fit: 'width',
+            theme: 'monokai'
+        });
+    </script>
+</body>
+</html>
